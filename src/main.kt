@@ -1,3 +1,3 @@
 fun main() {
-    Window().startAnim()
+    Interactive().start()
 }
