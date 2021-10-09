@@ -13,8 +13,8 @@ class Interactive : JFrame() {
             override fun paintComponent(g: Graphics) {
                 g.color = Color.WHITE
                 g.fillRect(0, 0, screen.width, screen.height)
-                val x: Int = screen.getWidth() / 2 - 20 + px
-                val y: Int = screen.getHeight() / 2 - 20 + py
+                val x: Int = screen.width / 2 - 20 + px
+                val y: Int = screen.height / 2 - 20 + py
                 g.color = Color.BLUE
                 g.fillRect(x, y, 40, 40)
                 g.drawString("Agora eu estou em $x x $y", 5, 10)
@@ -26,7 +26,12 @@ class Interactive : JFrame() {
     private var playing: Boolean = true
 
     private val fps: Int = 60
-    private val frametimeMs: Int = (1.0/fps.toDouble() * 1000).roundToInt()
+    private val frametimeMs: Int = (1.0 / fps.toDouble() * 1000).roundToInt()
+
+    private var upKeyControl: Boolean = false
+    private var downKeyControl: Boolean = false
+    private var rightKeyControl: Boolean = false
+    private var leftKeyControl: Boolean = false
 
     init {
         super.getContentPane().add(screen)
@@ -37,36 +42,53 @@ class Interactive : JFrame() {
             override fun keyTyped(p0: KeyEvent?) {
             }
 
-            override fun keyReleased(p0: KeyEvent?) {
+            override fun keyReleased(e: KeyEvent) {
+                setKey(e.keyCode, false)
             }
 
             override fun keyPressed(e: KeyEvent) {
-                when (e.keyCode) {
-                    KeyEvent.VK_ESCAPE -> {
-                        playing = false
-                        dispose()
-                    }
-                    KeyEvent.VK_UP -> py -= MOVE_RATE
-                    KeyEvent.VK_DOWN -> py += MOVE_RATE
-                    KeyEvent.VK_LEFT -> px -= MOVE_RATE
-                    KeyEvent.VK_RIGHT -> px += MOVE_RATE
-                }
-//                screen.repaint()
+                setKey(e.keyCode, true)
             }
         })
     }
 
-    fun start() {
+    private fun setKey(keyCode: Int, status: Boolean) {
+        when (keyCode) {
+            KeyEvent.VK_ESCAPE -> {
+                playing = false
+                dispose()
+            }
+            KeyEvent.VK_UP -> upKeyControl = status
+            KeyEvent.VK_DOWN -> downKeyControl = status
+            KeyEvent.VK_LEFT -> leftKeyControl = status
+            KeyEvent.VK_RIGHT -> rightKeyControl = status
+        }
+    }
+
+    fun startLoop() {
         var nextUpdate: Long = 0
         while (playing) {
             if (Utils.timeMs() >= nextUpdate) {
+                updateGame()
                 screen.repaint()
                 nextUpdate = Utils.timeMs() + frametimeMs
             }
         }
     }
 
+    private fun updateGame() {
+        when {
+            upKeyControl -> py -= MOVE_RATE
+            downKeyControl -> py += MOVE_RATE
+        }
+
+        when {
+            leftKeyControl -> px -= MOVE_RATE
+            rightKeyControl -> px += MOVE_RATE
+        }
+    }
+
     companion object {
-        private const val MOVE_RATE = 1
+        private const val MOVE_RATE = 2
     }
 }
